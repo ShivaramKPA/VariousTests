@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
-package lookandfeel;
+package varioustests.lookandfeel;
 
 import javax.swing.plaf.*;
 import javax.swing.plaf.metal.*;

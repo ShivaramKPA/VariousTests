@@ -1,3 +1,5 @@
+package varioustests;
+
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
