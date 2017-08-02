@@ -6,7 +6,7 @@
 package testlayouts;
 
 //http://www.java2s.com/Tutorial/Java/0240__Swing/UsingaBoxLayoutManager.htm
-import components.SpringUtilities;
+import swing.components.SpringUtilities;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import javax.swing.Box;

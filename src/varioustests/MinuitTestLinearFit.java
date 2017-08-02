@@ -51,8 +51,8 @@ public class MinuitTestLinearFit {
         KrishnaFcn theFCN = new KrishnaFcn(theXvalues, measurements);
 
         MnUserParameters upar = new MnUserParameters();
-        upar.add("p0", 1.0, 0.1);
-        upar.add("p1", 1.5, 0.1);
+        upar.add("p0", -1.0, 0.2);
+        upar.add("p1", -1.5, 0.2);
 
         System.out.println("Initial parameters: " + upar);
         //System.out.println("exit...");   System.exit(0);   //kp
