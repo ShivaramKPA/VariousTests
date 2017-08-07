@@ -12,7 +12,7 @@ package swing.concurrency;
 public class StopWithVolatileFlagNoGUI {
     public static void main(String[] args) 
     {
-        MyThreadWithVolatileFlag thread = new MyThreadWithVolatileFlag();
+        MyThreadWithVolatileFlagNoGUI thread = new MyThreadWithVolatileFlagNoGUI();
          
         thread.start();
          

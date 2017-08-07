@@ -9,12 +9,13 @@ package swing.concurrency;
  * Used by StopWithInterruptNoGUI class
  * @author kpadhikari
  */
-public class MyThread extends Thread {    
+public class MyThreadForIntterruptTest extends Thread {    
     @Override
     public void run()
     {
         while (!Thread.interrupted())
         {
+            //Thread.sleep(1000);
             System.out.println("I am running....");
         }
          

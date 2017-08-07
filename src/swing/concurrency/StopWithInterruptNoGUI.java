@@ -14,7 +14,7 @@ public class StopWithInterruptNoGUI
 {       
     public static void main(String[] args) 
     {
-        MyThread thread = new MyThread();
+        MyThreadForIntterruptTest thread = new MyThreadForIntterruptTest();
          
         thread.start();
          

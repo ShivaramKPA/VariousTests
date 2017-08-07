@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<META NAME="KEYWORDS" CONTENT="Java Console,Java broncode voorbeeld">
+<META NAME="DESCRIPTION" CONTENT="Een simpele Java console voor uw grafische applicatie">
+<TITLE>Simpele Java Console (op Swing gebaseerd)</TITLE>
+<LINK REL="STYLESHEET" TYPE="text/css" HREF="../../comweb.css">
+<STYLE type="text/css">
+body { background: #FFFFFF; }
+</STYLE>
+</HEAD>
+
+<BODY marginwidth="5" marginheight="5" leftmargin="5" topmargin="5">
+
+
+<FONT FACE="Arial,Helvetica" SIZE="5"><B><U>Een simpele Java console:</U></B></FONT>
+<BR>
+<BR>
+<B><U>Disclaimer:</U></B><BR>
+Het gebruik is op eigen risico.<BR>
+<BR>
+<B><U>Omschrijving:</U></B><BR>
+Op een Java Console wordt normaal de foutmeldingen en andere informatie geprint.<BR>
+Het is dus een heel handig stuk gereedschap om fouten op te sporen.<BR>
+Deze tool leidt de standard output en standard error output om naar de console.<BR>
+Deze Console is weliswaar niet geschreven om als bean in een ontwikkel omgeving te gebruiken maar is toch makkelijk middels plakken en knippen toe te voegen.<BR>
+Met deze broncode is het erg gemakkelijk om Uw grafische applicatie een Java console te geven.<BR>
+<BR>
+<B><U>Java versie:</U></B><BR>
+Deze versie gebruikt Swing elementen dat houdt impliciet in dat Java versie 1.1.5 of hoger nodig is.<BR>
+De Microsoft Java Virtual Machine (=JVM) gaat niet verder dan 1.1.4.<BR>
+Het is echter raadzaam om de laatste Java versie van Sun te gebruiken. (minder bugs, uitgebreider, veiliger en stabieler).<BR>
+<BR>
+<B><U>Testen:</U></B><BR>
+Uit testen tot zover zijn geen fouten tevoorschijn gekomen.<BR>
+Maar mocht U er een tegen komen......<BR>
+<BR>
+<B><U>Bron code en omschrijving:</U></B><BR>
+De groene regels zijn er alleen voor demonstratie doeleinden.<BR>
+<A HREF="http://www.comweb.nl/java/Console/Console.zip"><FONT SIZE="+1">&lt;DONWLOAD&gt;</FONT></A><BR>
+<BR>
+<A HREF="#r1_10">Regels 1.....10: Java commentaar.</A><BR>
+<A HREF="#r11">Regels 11....14: import statements.</A><BR>
+<A HREF="#r16">Regel 16: definieert de Console class.</A><BR>
+<A HREF="#r18">Regels 18....27: class variables.</A><BR>
+<A HREF="#r29">Regel 29...106: constructor.</A><BR>
+<A HREF="#r51">Regel 51....63: omleiden van System.out.</A><BR>
+<A HREF="#r65">Regel 65....77: omleiden van System.err.</A><BR>
+<A HREF="#r81">Regel 81....89: De twee reader threads worden gestart</A><BR>
+<A HREF="#r91">Regel 91...105: Alleen voor demo doeleinden</A><BR>
+<A HREF="#r108">Regel 108..125: Event Listener methodes.</A><BR>
+<A HREF="#r127">Regel 127: synchronized run methode , Er zijn twee threads die hun werk hier doen.</A><BR>
+<A HREF="#r157">Regels 157..162: voor demonstratie doeleinden, gooit een NullPointerException op de console na ongeveer 1 seconde.</A><BR>
+<A HREF="#r166">Regel 166..178: de ReadLine methode.</A><BR>
+<A HREF="#r180">Regel 180..183: applicatie main methode.</A><BR>
+<BR>
+<PRE>
+<A NAME="r1_10">1: //</A>
+2: // A simple Java Console for your application (Swing version)
+3: // Requires Java 1.1.5 or higher
+4: //
+5: // Disclaimer the use of this source is at your own risk.
+6: //
+7: // Permission to use and distribute into your own applications
+8: //
+9: // RJHM van den Bergh , rvdb@comweb.nl
+10:
+<A NAME="r11">11: import java.io.*;</A>
+12: import java.awt.*;
+13: import java.awt.event.*;
+14: import javax.swing.*;
+15:
+<A NAME="r16">16: public class Console extends WindowAdapter implements WindowListener,  ActionListener, Runnable</A>
+17: {
+<A NAME="r18">18:	private JFrame frame;</A>
+19:	private JTextArea textArea;
+20:	private Thread reader;
+21:	private Thread reader2;
+22:	private boolean quit;
+23:
+24:	private final PipedInputStream pin=new PipedInputStream();
+25:	private final PipedInputStream pin2=new PipedInputStream();
+26:
+<FONT COLOR="GREEN">27:	Thread errorThrower; // just for testing (Throws an Exception at this Console</FONT>
+28:
+<A NAME="r29">29:	public Console()</A>
+30:	{
+31:		// create all components and add them
+32:		frame=new JFrame(&quot;Java Console&quot;);
+33:		Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
+34:		Dimension frameSize=new Dimension((int)(screenSize.width/2),(int)(screenSize.height/2));
+35:		int x=(int)(frameSize.width/2);
+36:		int y=(int)(frameSize.height/2);
+37:		frame.setBounds(x,y,frameSize.width,frameSize.height);
+38:
+39:		textArea=new JTextArea();
+40:		textArea.setEditable(false);
+41:		JButton button=new JButton(&quot;clear&quot;);
+42:
+43:		frame.getContentPane().setLayout(new BorderLayout());
+44:		frame.getContentPane().add(new JScrollPane(textArea),BorderLayout.CENTER);
+45:		frame.getContentPane().add(button,BorderLayout.SOUTH);
+46:		frame.setVisible(true);
+47:
+48:		frame.addWindowListener(this);
+49:		button.addActionListener(this);
+50:
+<A NAME="r51">51:		try</A>
+52:		{
+53:			PipedOutputStream pout=new PipedOutputStream(this.pin);
+54:			System.setOut(new PrintStream(pout,true));
+55:		}
+56:		catch (java.io.IOException io)
+57:		{
+58:			textArea.append(&quot;Couldn't redirect STDOUT to this console\n&quot;+io.getMessage());
+59:		}
+60:		catch (SecurityException se)
+61:		{
+62:			textArea.append(&quot;Couldn't redirect STDOUT to this console\n&quot;+se.getMessage());
+63:        	}
+64:
+<A NAME="r65">65:		try</A>
+66:		{
+67:			PipedOutputStream pout2=new PipedOutputStream(this.pin2);
+68:			System.setErr(new PrintStream(pout2,true));
+69:		}
+70:		catch (java.io.IOException io)
+71:		{
+72:			textArea.append(&quot;Couldn't redirect STDERR to this console\n&quot;+io.getMessage());
+73:		}
+74:		catch (SecurityException se)
+75:		{
+76:			textArea.append(&quot;Couldn't redirect STDERR to this console\n&quot;+se.getMessage());
+77:		}
+78:
+79:		quit=false; // signals the Threads that they should exit
+80:
+<A NAME="r81">81:		// Starting two separate threads to read from the PipedInputStreams</A>
+82:		//
+83:		reader=new Thread(this);
+84:		reader.setDaemon(true);
+85:		reader.start();
+86:		//
+87:		reader2=new Thread(this);
+88:		reader2.setDaemon(true);
+89:		reader2.start();
+90:
+<A NAME="r91"><FONT COLOR="GREEN">91:		// testing part</FONT></A>
+<FONT COLOR="GREEN">92:		// you may omit this part for your application
+93:		//
+94:		System.out.println(&quot;Hello World 2&quot;);
+95:		System.out.println(&quot;All fonts available to Graphic2D:\n&quot;);
+96:		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+97:		String[] fontNames=ge.getAvailableFontFamilyNames();
+98:		for(int n=0;n&lt;fontNames.length;n++)  System.out.println(fontNames[n]);
+99:		// Testing part: simple an error thrown anywhere in this JVM will be printed on the Console
+100:		// We do it with a seperate Thread becasue we don't wan't to break a Thread used by the Console.
+101:
+102:		System.out.println(&quot;\nLets throw an error on this console&quot;);
+103:		errorThrower=new Thread(this);
+104:		errorThrower.setDaemon(true);
+105:		errorThrower.start();</FONT>
+106:	}
+107:
+<A NAME="r108">108:	public synchronized void windowClosed(WindowEvent evt)</A>
+109:	{
+110:		quit=true;
+111:		this.notifyAll(); // stop all threads
+112:		try { reader.join(1000);pin.close();   } catch (Exception e){}
+113:		try { reader2.join(1000);pin2.close(); } catch (Exception e){}
+<FONT COLOR="GREEN">114:		System.exit(0);</FONT>
+115:	}
+116:	public synchronized void windowClosing(WindowEvent evt)
+117:	{
+118:		frame.setVisible(false); // default behaviour of JFrame
+<FONT COLOR="GREEN">119:		frame.dispose();</FONT>
+120:	}
+121:
+122:	public synchronized void actionPerformed(ActionEvent evt)
+123:	{
+124:		textArea.setText(&quot;&quot;);
+125:	}
+126:
+<A NAME="r127">127:	public synchronized void run()</A>
+128:	{
+129:		try
+129:		{
+130:			while (Thread.currentThread()==reader)
+131:			{
+132:				try { this.wait(100);}catch(InterruptedException ie) {}
+133:				if (pin.available()!=0)
+134:				{
+135:					String input=this.readLine(pin);
+136:					textArea.append(input);
+137:				}
+138:				if (quit) return;
+139:			}
+140:
+141:			while (Thread.currentThread()==reader2)
+142:			{
+143:				try { this.wait(100);}catch(InterruptedException ie) {}
+144:				if (pin2.available()!=0)
+145:				{
+146:					String input=this.readLine(pin2);
+147:					textArea.append(input);
+148:				}
+149:				if (quit) return;
+150:			}
+151:		} catch (Exception e)
+152:		{
+153:			textArea.append(&quot;\nConsole reports an Internal error.&quot;);
+154:			textArea.append(&quot;The error is: &quot;+e);
+155:		}
+156:
+<FONT COLOR="GREEN"><A NAME="r157">157:		// just for testing (Throw a Nullpointer after 1 second)</A>
+158:		if (Thread.currentThread()==errorThrower)
+159:		{
+160:			try { this.wait(1000); }catch(InterruptedException ie){}
+161:			throw new NullPointerException(&quot;Application test: throwing an NullPointerException It should arrive at the console&quot;);
+162:		}</FONT>
+163:
+164:	}
+165:
+<A NAME="r166">166:	public synchronized String readLine(PipedInputStream in) throws IOException</A>
+167:	{
+168:		String input=&quot;&quot;;
+169:		do
+170:		{
+171:			int available=in.available();
+172:			if (available==0) break;
+173:			byte b[]=new byte[available];
+174:			in.read(b);
+175:			input=input+new String(b,0,b.length);
+176:		}while( !input.endsWith(&quot;\n&quot;) &amp;&amp;  !input.endsWith(&quot;\r\n&quot;) &amp;&amp; !quit);
+177:		return input;
+178:	}
+179:
+<FONT COLOR="GREEN"><A NAME="r180">180:	public static void main(String[] arg)</A>
+181:	{
+182:		new Console(); // create console with not reference
+183:	}</FONT>
+184:}
+</PRE>
+
+<B><U>Copyright</U></B><BR>
+Gratis te gebruiken.<BR>
+<BR>
+<A HREF="mailto:info@comweb.nl?subject=Java%20Console">info@comweb.nl</A><BR>
+<BR>
+<BR>
+<BR>
+
+</BODY>
+</HTML>

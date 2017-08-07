@@ -10,7 +10,7 @@ package swing.concurrency;
  * @author http://javaconceptoftheday.com/how-to-stop-a-thread-in-java/
  * 
  */
-public class MyThreadWithVolatileFlag extends Thread {
+public class MyThreadWithVolatileFlagNoGUI extends Thread {
     //Initially setting the flag as true
      
     private volatile boolean flag = true;
