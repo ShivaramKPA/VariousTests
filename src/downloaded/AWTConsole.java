@@ -7,7 +7,7 @@
 // Permision to use and distribute into your own applications
 //
 // RJHM van den Bergh , rvdb@comweb.nl
-package downloaded;
+package downloaded;  //kp: http://www.comweb.nl/java/Console/Console.html
 
 import java.io.*;
 import java.awt.*;
