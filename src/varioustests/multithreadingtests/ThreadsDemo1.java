@@ -20,7 +20,8 @@ class MyThreadSubclass extends Thread {
     public void run() {
         //throw new UnsupportedOperationException("Not supported yet."); 
         for (int i = 0; i < 10; i++) {
-            System.out.println(Thread.currentThread().getId() + " i=" + i);
+            System.out.println(Thread.currentThread().getName() + " " 
+                    + Thread.currentThread().getId() + " i=" + i);
         }
 
         try {

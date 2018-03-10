@@ -30,19 +30,19 @@ package swing.concurrency;
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */ 
-
+ */
 //package components;
-
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.beans.*;
 import java.util.Random;
+import java.util.Set;
+
 
 public class ProgressBarDemo extends JPanel
-                             implements ActionListener, 
-                                        PropertyChangeListener {
+        implements ActionListener,
+        PropertyChangeListener {
 
     private JProgressBar progressBar;
     private JButton startButton;
@@ -53,6 +53,7 @@ public class ProgressBarDemo extends JPanel
     //   SwingWorker is an abstract class and we must define its subclass as follows:
     // All concrete subclasses of SwingWorker implement doInBackground; implementation of done is optional.
     class Task extends SwingWorker<Void, Void> {
+
         /*
          * Main task. Executed in background thread.
          */
@@ -66,7 +67,8 @@ public class ProgressBarDemo extends JPanel
                 //Sleep for up to one second.
                 try {
                     Thread.sleep(random.nextInt(1000));
-                } catch (InterruptedException ignore) {}
+                } catch (InterruptedException ignore) {
+                }
                 //Make random progress.
                 progress += random.nextInt(10);
                 setProgress(Math.min(progress, 100));
@@ -101,7 +103,7 @@ public class ProgressBarDemo extends JPanel
         progressBar.setStringPainted(true);
 
         taskOutput = new JTextArea(5, 20);
-        taskOutput.setMargin(new Insets(5,5,5,5));
+        taskOutput.setMargin(new Insets(5, 5, 5, 5));
         taskOutput.setEditable(false);
 
         JPanel panel = new JPanel();
@@ -136,15 +138,17 @@ public class ProgressBarDemo extends JPanel
             progressBar.setValue(progress);
             taskOutput.append(String.format(
                     "Completed %d%% of task.\n", task.getProgress()));
-        } 
+        }
     }
 
-
     /**
-     * Create the GUI and show it. As with all GUI code, this must run
-     * on the event-dispatching thread.
+     * Create the GUI and show it. As with all GUI code, this must run on the
+     * event-dispatching thread.
      */
     private static void createAndShowGUI() {
+                System.out.println("Inside createAndShowGUI(): This is " 
+                        + Thread.currentThread().getName() + " thread with ID = " 
+                        + Thread.currentThread().getId() + " before calling setVisible(true);");        
         //Create and set up the window.
         JFrame frame = new JFrame("ProgressBarDemo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -157,15 +161,74 @@ public class ProgressBarDemo extends JPanel
         //Display the window.
         frame.pack();
         frame.setVisible(true);
+                System.out.println("Inside createAndShowGUI(): This is " 
+                        + Thread.currentThread().getName() + " thread with ID = " 
+                        + Thread.currentThread().getId() + " after calling setVisible(true);");         
     }
 
     public static void main(String[] args) {
+        //It will show that we're in the main thread with ID=1
+        System.out.println("This is " + Thread.currentThread().getName()
+                + " thread with ID = " + Thread.currentThread().getId());
+
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                System.out.println("This is " + Thread.currentThread().getName()
+                        + " thread with ID = " + Thread.currentThread().getId()
+                        + " just before calling createAndShowGUI();");
+
                 createAndShowGUI();
+
+                System.out.println("This is " + Thread.currentThread().getName()
+                        + " thread with ID = " + Thread.currentThread().getId()
+                        + " just after calling createAndShowGUI();");
             }
         });
+        
+        
+        //showAllThreads();
+        //showAllThreads2();
+        showAllThreads3();        
     }
+    
+    public static void showAllThreads() {
+        //https://www.tutorialspoint.com/javaexamples/thread_showall.htm
+        ThreadGroup currentGroup = Thread.currentThread().getThreadGroup();
+        int noThreads = currentGroup.activeCount();
+        System.out.println("kp: # of threads = " + noThreads);
+        Thread[] lstThreads = new Thread[noThreads];
+        currentGroup.enumerate(lstThreads);
+
+        for (int i = 0; i < noThreads; i++) {
+            System.out.println("Thread No:" + i + " = " + lstThreads[i].getName());
+        }
+    }
+
+    public static void showAllThreads2() {
+        //https://stackoverflow.com/questions/1323408/get-a-list-of-all-threads-currently-running-in-java
+        Thread.getAllStackTraces().keySet().forEach((t) -> System.out.println(t.getName() 
+                + "\nIs Daemon " + t.isDaemon() + "\nIs Alive " + t.isAlive()));
+    }
+
+    public static void showAllThreads3() {
+        //http://www.codejava.net/java-core/concurrency/how-to-list-all-threads-currently-running-in-java
+        //The following code snippet will list all threads that are currently running 
+        // in the JVM along with their information like name, state, priority, and daemon status:        
+        Set<Thread> threads = Thread.getAllStackTraces().keySet();
+
+        System.out.println("####################################################");
+        System.out.println("thread-name    thread-state   Id   priority       type");
+        System.out.println("####################################################");
+        for (Thread t : threads) {
+            String name = t.getName();
+            Thread.State state = t.getState();
+            long Id = t.getId();
+            int priority = t.getPriority();
+            String type = t.isDaemon() ? "Daemon" : "Normal";
+            System.out.printf("%-20s \t %s \t %d \t %d \t %s\n", name, state, Id, priority, type);
+        }
+        System.out.println("####################################################");
+    }    
 }

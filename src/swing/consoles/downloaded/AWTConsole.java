@@ -7,7 +7,8 @@
 // Permision to use and distribute into your own applications
 //
 // RJHM van den Bergh , rvdb@comweb.nl
-package downloaded;  //kp: http://www.comweb.nl/java/Console/Console.html
+//package downloaded;   //kp: http://www.comweb.nl/java/Console/Console.html
+package swing.consoles.downloaded;
 
 import java.io.*;
 import java.awt.*;
