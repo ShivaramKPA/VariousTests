@@ -108,7 +108,7 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
     ArrayList<String> fileArray = null;
 
     public DC_GUI() {
-        createFrame();
+        prepareFrame();
         createFileChooser();
         createButtons();
         createPanels();
@@ -120,7 +120,7 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
         listen(); //3/6/18
     }
 
-    private void createFrame() {
+    private void prepareFrame() {
         // create all components and add them
         frame = new JFrame("DC Calibration Console");
         frame.setLayout(new BorderLayout());// kp
@@ -537,9 +537,9 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
         frame.getContentPane().add(panelForWelcomeAndOpenFile, BorderLayout.NORTH);
         frame.getContentPane().add(centerPanel, BorderLayout.CENTER);
         frame.getContentPane().add(buttonClear, BorderLayout.SOUTH);
-        //frame.setVisible(true); // this line is active also in createFrame(), called earlier
+        //frame.setVisible(true); // this line is active also in prepareFrame(), called earlier
 
-        frame.setVisible(true); // this line is active also in createFrame(), called earlier
+        frame.setVisible(true); // this line is active also in prepareFrame(), called earlier
         popoutInfoAboutOrderOfAction(); //Call this after main window pops-up, so both are visible.
     }
 
