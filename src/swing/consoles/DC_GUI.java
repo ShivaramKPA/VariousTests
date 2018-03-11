@@ -114,10 +114,10 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
         createPanels();
         initFrame();
         
-        //The following listen() method takes care of creating & preparing two 
+        //The following launchThreadsToRedirectStdOutAndStdErr() method takes care of creating & preparing two 
         //    threads 'reader' and 'reader2' that handles redirecting std-out and 
         //    std-err by using piped input and output streams.
-        listen(); //3/6/18
+        launchThreadsToRedirectStdOutAndStdErr(); //3/6/18
     }
 
     private void prepareFrame() {
@@ -257,6 +257,7 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
 
                 String choice = ae.getActionCommand();
                 if (choice.equals("Quit")) {
+                    System.out.println("Quitting ....");
                     System.exit(0);
                 } else {
                     createDialogForT0Correction();
@@ -499,7 +500,7 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
             public void actionPerformed(ActionEvent e) {
                 isLinearFit = true;
                 //listen();
-                addListeners();
+                addListenersForT2DFitting();
             }
         }
         );
@@ -511,7 +512,7 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
         nonLinearFitButton.addActionListener((ActionEvent e) -> {
             isLinearFit = false;
             //listen();
-            addListeners();
+            addListenersForT2DFitting();
         });
 
         //addListeners(); //3/3/18: adding actionListener to bTimeToDistance
@@ -543,7 +544,7 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
         popoutInfoAboutOrderOfAction(); //Call this after main window pops-up, so both are visible.
     }
 
-    private void addListeners() {
+    private void addListenersForT2DFitting() {
         //listen(); //kp: Moving this to the constructor of this class, so that all std-out will be redirected
 
         System.out.println("isLinearFit = " + isLinearFit);
@@ -563,6 +564,13 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
                         System.exit(1);
                     }
 
+                    //Following class implements Runnable, and so has run() method implemented in
+                    //   it, which is called when the start() method is invoked on the thread
+                    //   to which the object 'e3' of that class is passed. Since, the constructor
+                    //   is written such that only initializations are done in there, not the
+                    //   call to start the actual fitting process, the following line doesn't start
+                    //   that process. The process starts only when the bTimeToDistance button is
+                    //   clicked, which will then trigger the run() method via the start() call.
                     DC_TimeToDistanceFitter e3 = new DC_TimeToDistanceFitter(OA, fileArray, isLinearFit);
                     //TimeToDistanceFitter e3 = new DC_TimeToDistanceFitter(fileArray, isLinearFit);
                     //ReadRecDataForMinuitNewFileOldWay e3 = new ReadRecDataForMinuitNewFileOldWay(OA, fileArray, isLinearFit);
@@ -575,7 +583,7 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
         //listen();
     }
 
-    private void listen() {
+    private void launchThreadsToRedirectStdOutAndStdErr() {
         //frame.addWindowListener(this);
         try {
             PipedOutputStream pout = new PipedOutputStream(this.pin);
@@ -700,6 +708,9 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
 *
          */       
         try {            
+            //kp: Following join method asks the current thread (i.e. the EDT thread - in 
+            //    which our Swing windows/frames run) to wait (i.e. not move ahead or exit 
+            //    early) until the reader thread terminates/exits.
             reader.join(1000);
             pin.close();
         } catch (Exception e) {
@@ -756,7 +767,7 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
     //kp: 3/3/18: This is required because this class is implementing Runnable interface
     //      of which this is the only method (that needs to be implemented).
     //    Remember that this method will be executed when two threads 'reader' and 
-    //       'reader2' are start()ed in listen() method above, that's because we're
+    //       'reader2' are start()ed in launchThreadsToRedirectStdOutAndStdErr() method above, that's because we're
     //        passing 'this' into those threads during the creation of the treads by 
     //        lines such as 'reader = new Thread(this);'. Note that 'this' is the 
     //        reference to the object of this class that we're working on here, which 

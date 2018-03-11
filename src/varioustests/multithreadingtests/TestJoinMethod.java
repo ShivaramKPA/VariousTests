@@ -42,24 +42,13 @@ import java.util.logging.Logger;
  *
  * @author kpadhikari
  */
-class NewThread implements Runnable {
-
-    public void run() {
-        try {
-            //Let's make this thread sleep for 5 secs
-            Thread.sleep(5000);//5000 milliseconds
-
-            System.out.println("New Thread Terminating ...");
-        } catch (InterruptedException e) {
-            System.out.println("Exception ...");
-        }
-    }
-}
 
 public class TestJoinMethod {
 
     public static void main(String[] args) throws InterruptedException {
-
+        
+        System.out.println("kp: Please note that if there is at least one non-Daemon \n" 
+                + "thread still running in the process, the main() thread can exit early.\n\n");
         Thread th = new Thread(new NewThread());
         th.start();
 
@@ -69,4 +58,21 @@ public class TestJoinMethod {
         System.out.println("Main Thread Terminating ...");
     }
 
+}
+
+class NewThread implements Runnable {
+
+    public void run() {
+        int sleepTime = 5000; //In milliseconds
+        try {
+            System.out.println("kp: The 'NewThread' already started but now it's pausing for "
+            + sleepTime + " milliseconds.");
+            //Let's make this thread sleep for 5 secs
+            Thread.sleep(sleepTime);//5000 milliseconds
+
+            System.out.println("New Thread Terminating ...");
+        } catch (InterruptedException e) {
+            System.out.println("Exception ...");
+        }
+    }
 }
