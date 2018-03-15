@@ -38,6 +38,9 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Action;
 
 import javax.swing.BorderFactory;
@@ -69,7 +72,8 @@ import javax.swing.text.TextAction;
 //import org.jlab.dc_calibration.domain.OrderOfAction;
 //import org.jlab.dc_calibration.domain.RunReconstructionCoatjava4;
 //import org.jlab.dc_calibration.domain.DC_TimeToDistanceFitter;
-public class DC_GUI extends WindowAdapter implements WindowListener, ActionListener, Runnable {
+public class DC_GUI extends WindowAdapter implements ActionListener, Runnable {
+//public class DC_GUI extends WindowAdapter implements WindowListener, ActionListener, Runnable {
 
     private JFrame frame;
     private JTextArea textArea;
@@ -108,12 +112,15 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
     ArrayList<String> fileArray = null;
 
     public DC_GUI() {
+        //showAllThreads();
+        Constants.showAllThreads();
+        
         prepareFrame();
         createFileChooser();
         createButtons();
         createPanels();
         initFrame();
-        
+
         //The following launchThreadsToRedirectStdOutAndStdErr() method takes care of creating & preparing two 
         //    threads 'reader' and 'reader2' that handles redirecting std-out and 
         //    std-err by using piped input and output streams.
@@ -564,6 +571,9 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
                         System.exit(1);
                     }
 
+                    System.out.println("kp: Hello from FileChooser-ActionListener and\n"
+                            + "\t I am currently on " + Thread.currentThread().getName() + " thread.\n");
+
                     //Following class implements Runnable, and so has run() method implemented in
                     //   it, which is called when the start() method is invoked on the thread
                     //   to which the object 'e3' of that class is passed. Since, the constructor
@@ -575,7 +585,11 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
                     //TimeToDistanceFitter e3 = new DC_TimeToDistanceFitter(fileArray, isLinearFit);
                     //ReadRecDataForMinuitNewFileOldWay e3 = new ReadRecDataForMinuitNewFileOldWay(OA, fileArray, isLinearFit);
                     bTimeToDistance.addActionListener(ee -> {
-                        new Thread(e3).start();
+
+                        System.out.println("kp: Hello from bTimeToDistance-ActionListener and\n"
+                                + "\t I am currently on " + Thread.currentThread().getName() + " thread.\n");
+
+                        new Thread(e3).start(); //Will start a new thread to run the fitter (& fit-panel too?)
                     });
                 }
             }
@@ -646,33 +660,13 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
         }
     }
 
-    //
-    // kp: 3/3/18:
-    //The windowClosed(..), windowClosing(..) etc are some of the methods of
-    // the WindowListener interface. We don't have to implement all the methods of this
-    // interface here because this class also extends WindowAdapter which is an abstract
-    //  adapter class for receiving window events. The methods in this abstract class  
-    //   are empty and the class exists as convenience for creating listener objects. 
-    //  (If you implement the WindowListener interface, you have to define all of the 
-    //     methods in it. This abstract class defines null methods for them all, so you can 
-    //     only have to define methods for events you care about.) 
-    // see https://docs.oracle.com/javase/7/docs/api/java/awt/event/WindowListener.html 
-    // and https://docs.oracle.com/javase/7/docs/api/java/awt/event/WindowAdapter.html 
-    //  The latter webpage says the following about WindowAdapter abstract class:
-    //      Create a listener object using the extended class and then register it with a 
-    //      Window (frame in our case) using the window's addWindowListener method (for 
-    //      example see the line 'frame.addWindowListener(this)' above. When the window's status 
-    //      changes by virtue of being opened, closed, activated or deactivated, iconified 
-    ///     or deiconified, the relevant method in the listener object ('this' object in 
-    //      this/our case) is invoked, and the WindowEvent is passed to it.
-    //
-    public synchronized void windowClosed(WindowEvent evt) {
-        quit = true;
+    public void closeBackgroundThreads() {
         // https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html
         // notify() :   Wakes up a single thread that is waiting on this object's monitor.
         // notifyAll() : Wakes up all threads that are waiting on this object's monitor.
         this.notifyAll(); // stop all threads (kp: notify All threads?)
-/*        
+
+        /*        
         // kp:
         // https://docs.oracle.com/javase/tutorial/essential/concurrency/join.html
 
@@ -693,9 +687,8 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
         join(long millis) : Waits at most millis milliseconds for this thread to die.
         join(long millis, int nanos)  : Waits at most millis milliseconds plus nanos 
         nanoseconds for this thread to die.
-         */       
-        
-/*
+         */
+ /*
 * https://www.youtube.com/watch?v=vLjucKGR654 JOIN() METHOD : JAVA MULTITHREADING TUTORIALS
 *   3/8/18:
 *  Join() method ensures termination of thread which calls its join method 
@@ -706,8 +699,8 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
 *    thread' (from which the call is made) has to wait until that thread (whose 
 *    join method is called) completes it's execution.
 *
-         */       
-        try {            
+         */
+        try {
             //kp: Following join method asks the current thread (i.e. the EDT thread - in 
             //    which our Swing windows/frames run) to wait (i.e. not move ahead or exit 
             //    early) until the reader thread terminates/exits.
@@ -720,14 +713,56 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
             pin2.close();
         } catch (Exception e) {
         }
+    }
+
+    //
+    // kp: 3/3/18:
+    //The windowClosed(..), windowClosing(..) etc are some of the methods of
+    // the WindowListener interface. We don't have to implement all the methods of this
+    // interface here because this class also extends WindowAdapter which is an abstract
+    //  adapter class for receiving window events. The methods in this abstract class  
+    //   are empty and the class exists as convenience for creating listener objects. 
+    //  (If you implement the WindowListener interface, you have to define all of the 
+    //     methods in it. This abstract class defines null methods for them all, so you can 
+    //     only have to define methods for events you care about.) 
+    // see https://docs.oracle.com/javase/7/docs/api/java/awt/event/WindowListener.html 
+    // and https://docs.oracle.com/javase/7/docs/api/java/awt/event/WindowAdapter.html 
+    //  The latter webpage says the following about WindowAdapter abstract class:
+    //      Create a listener object using the extended class and then register it with a 
+    //      Window (frame in our case) using the window's addWindowListener method (for 
+    //      example see the line 'frame.addWindowListener(this)' above. When the window's status 
+    //      changes by virtue of being opened, closed, activated or deactivated, iconified 
+    ///     or deiconified, the relevant method in the listener object ('this' object in 
+    //      this/our case) is invoked, and the WindowEvent is passed to it.
+    //
+    /*
+    https://www.java-forums.org/new-java/31363-windowclosed-vs-windowclosing.html
+windowClosed(): After window has closed.
+windowClosing(): The process of being closed.    
+     */
+    public synchronized void windowClosed(WindowEvent evt) {
+        quit = true;
+        closeBackgroundThreads(); //kp: 3/14/18: Moved all the stuff here to this new method
+
         System.exit(0);
     }
 
     public synchronized void windowClosing(WindowEvent evt) {
+//        quit = true;
+//        System.out.println("kp: Hello from windowClosed(evt) and I am currently on "
+//                + Thread.currentThread().getName() + "thread.");
+//        
+//        try {
+//            this.wait(1000); //kp: Just to see above line printed (3/14/18)
+//        } catch (InterruptedException ex) {
+//            Logger.getLogger(DC_GUI.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        //quit = true;
+//        closeBackgroundThreads();
+
         frame.setVisible(false); // default behaviour of JFrame
         frame.dispose();
     }
-
 
     //kp: 3/3/18: This is required because this class is implementing ActionListener interface
     //      of which this is the only method (that needs to be implemented).
@@ -868,4 +903,5 @@ public class DC_GUI extends WindowAdapter implements WindowListener, ActionListe
     //
     // this.setJMenuBar(bar);
     // }
+       
 }
