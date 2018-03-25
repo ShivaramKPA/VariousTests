@@ -33,7 +33,7 @@
         nanoseconds for this thread to die.
  */
 
-package varioustests.multithreadingtests;
+package multithreading;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

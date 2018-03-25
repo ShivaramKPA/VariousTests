@@ -119,6 +119,7 @@ public final class Constants {
         Set<Thread> threads = Thread.getAllStackTraces().keySet();
 
         System.out.println("############################################################");
+        System.out.println("############## List of Current threads #####################");
         System.out.println("thread-name    thread-state      Id     priority       type");
         System.out.println("############################################################");
         for (Thread t : threads) {
@@ -130,6 +131,6 @@ public final class Constants {
                     //Thread.currentThread().getId(), priority, type);
                     t.getId(), priority, type);
         }
-        System.out.println("####################################################");
+        System.out.println("############################################################");
     }
 }

@@ -1,5 +1,5 @@
 //https://www3.ntu.edu.sg/home/ehchua/programming/java/j5e_multithreading.html
-package varioustests.multithreadingtests;
+package multithreading;
 
 import java.awt.*;
 import java.awt.event.*;

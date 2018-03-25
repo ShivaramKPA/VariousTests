@@ -1,14 +1,5 @@
-/*  +__^_________,_________,_____,________^-.-------------------,
- *  | |||||||||   `--------'     |          |                   O
- *  `+-------------USMC----------^----------|___________________|
- *    `\_,---------,---------,--------------'
- *      / X MK X /'|       /'
- *     / X MK X /  `\    /'
- *    / X MK X /`-------'
- *   / X MK X /
- *  / X MK X /
- * (________(                @author m.c.kunkel, kpadhikari
- *  `------'
+/*                 @author m.c.kunkel, kpadhikari
+ *  
  */
  /*
  * To change this license header, choose License Headers in Project Properties.
@@ -115,6 +106,7 @@ public class DC_GUI extends WindowAdapter implements ActionListener, Runnable {
         //showAllThreads();
         Constants.showAllThreads();
         
+        
         prepareFrame();
         createFileChooser();
         createButtons();
@@ -124,7 +116,16 @@ public class DC_GUI extends WindowAdapter implements ActionListener, Runnable {
         //The following launchThreadsToRedirectStdOutAndStdErr() method takes care of creating & preparing two 
         //    threads 'reader' and 'reader2' that handles redirecting std-out and 
         //    std-err by using piped input and output streams.
-        launchThreadsToRedirectStdOutAndStdErr(); //3/6/18
+        // Initially, I mistakenly thought that I could also put the following 
+        //    method call at the top of this constructor, well before the GUI is
+        //    opened, but I realized, that doesn't make sense, because we want 
+        //    these threads to redirect the outputs to the text are in the GUI that
+        //    we open. If we don't have that GUI defined already, these threads 
+        //    wont know where to output. I tried that but it didn't produce the 
+        //    intended behaviour/result, although the program didn't seem to crash.
+        launchThreadsToRedirectStdOutAndStdErr(); //3/6/18        
+        
+        Constants.showAllThreads();
     }
 
     private void prepareFrame() {
@@ -604,6 +605,7 @@ public class DC_GUI extends WindowAdapter implements ActionListener, Runnable {
             /*
             https://www.tutorialspoint.com/java/lang/system_setout.htm
             The java.lang.System.setOut() method reassigns the "standard" output stream.
+            http://java2s.com/Tutorials/Java/Stream_Reader_Writer/How_to_use_Java_PrintStream.htm
              */
             System.setOut(new PrintStream(pout, true));
             //PrintStream(OutputStream out, boolean autoFlush) - Creates a new print stream.
@@ -622,7 +624,7 @@ public class DC_GUI extends WindowAdapter implements ActionListener, Runnable {
             textArea.append("Couldn't redirect STDERR to this console\n" + se.getMessage());
         }
 
-        quit = false; // signals the Threads that they should exit
+        quit = false; // (kp: if true, it) signals the Threads that they should exit
         reader = new Thread(this);
         reader.setDaemon(true); // kp: make this thread a process running in the
         // background (no interactive access)

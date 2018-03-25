@@ -21,7 +21,7 @@
 *      ]
 *
  */
-package varioustests.multithreadingtests;
+package multithreading;
 
 /**
  *

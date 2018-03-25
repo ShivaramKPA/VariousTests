@@ -5,7 +5,7 @@
  *   and instantiating it's object and then calling 'start()' method
  *
  */
-package varioustests.multithreadingtests;
+package multithreading;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

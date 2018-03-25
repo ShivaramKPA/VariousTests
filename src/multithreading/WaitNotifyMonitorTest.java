@@ -33,7 +33,7 @@ adjective: spurious
         archaic
         (of offspring) illegitimate.
  */
-package varioustests.multithreadingtests;
+package multithreading;
 
 public class WaitNotifyMonitorTest {
 

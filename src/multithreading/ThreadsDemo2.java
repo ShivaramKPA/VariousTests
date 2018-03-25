@@ -3,7 +3,7 @@
  * Testing the second method of creating threads i.e.
  *    implementing the Runnable interface.
  */
-package varioustests.multithreadingtests;
+package multithreading;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

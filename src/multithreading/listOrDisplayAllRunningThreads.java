@@ -2,7 +2,7 @@
  * https://www.tutorialspoint.com/javaexamples/thread_showall.htm
 * https://stackoverflow.com/questions/1323408/get-a-list-of-all-threads-currently-running-in-java
  */
-package varioustests.multithreadingtests;
+package multithreading;
 
 import java.util.Set;
 

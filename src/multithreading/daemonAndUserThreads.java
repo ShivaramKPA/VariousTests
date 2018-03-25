@@ -36,7 +36,7 @@ thread can provide a service.
     Usage: Daemon thread is to provide services to user thread for background supporting task.
 
  */
-package varioustests.multithreadingtests;
+package multithreading;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
